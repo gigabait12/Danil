@@ -1,69 +1,173 @@
-//1.
 #include <iostream>
-#include <algorithm> 
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <locale>
 
-void sortArray(int* array, int size) {
-    std::sort(array, array + size);
+using namespace std;
+
+class Apartment {
+private:
+    int numberOfRooms; 
+    double area;       
+    string address;    
+    string ownerName;  
+
+public:
+    Apartment() : numberOfRooms(0), area(0.0), address(""), ownerName("") {}
+
+    Apartment(int rooms, double area, string addr, string owner)
+        : numberOfRooms(rooms), area(area), address(addr), ownerName(owner) {}
+
+    int getNumberOfRooms() const { return numberOfRooms; }
+    double getArea() const { return area; }
+    string getAddress() const { return address; }
+    string getOwnerName() const { return ownerName; }
+
+    void setNumberOfRooms(int rooms) { numberOfRooms = rooms; }
+    void setArea(double area) { this->area = area; }
+    void setAddress(const string& addr) { address = addr; }
+    void setOwnerName(const string& owner) { ownerName = owner; }
+
+    string getApartmentClass() const {
+        if (area < 30) {
+            return "Маленькая квартира";
+        } else if (area < 60) {
+            return "Средняя квартира";
+        } else {
+            return "Большая квартира";
+        }
+    }
+
+    void displayInfo() const {
+        cout << "Адрес: " << address << ", Владелец: " << ownerName
+             << ", Количество комнат: " << numberOfRooms
+             << ", Площадь: " << area << " м²"
+             << ", Класс квартиры: " << getApartmentClass() << endl;
+    }
+};
+
+void displayMenu() {
+    cout << "1. Добавить пустую квартиру\n";
+    cout << "2. Добавить квартиру с данными\n";
+    cout << "3. Редактировать квартиру\n";
+    cout << "4. Вывести информацию о всех квартирах\n";
+    cout << "5. Сортировать квартиры по площади\n";
+    cout << "6. Завершить работу\n";
 }
 
 int main() {
-    int size;
+    setlocale(LC_ALL, "rus");
+    vector<Apartment> apartments;
+    int choice;
 
-    std::cout << "Введите размер массива: ";
-    std::cin >> size;
+    do {
+        displayMenu();
+        cout << "Выберите пункт меню: ";
+        cin >> choice;
 
-    int* array = new int[size];
+        switch (choice) {
+            case 1: {
+                apartments.emplace_back(); 
+                cout << "Пустая квартира добавлена.\n";
+                break;
+            }
+            case 2: {
+                int rooms;
+                double area;
+                string address, ownerName;
 
-    std::cout << "Введите элементы массива:\n";
-    for (int i = 0; i < size; i++) {
-        std::cin >> array[i];
-    }
+                cout << "Введите количество комнат: ";
+                cin >> rooms;
+                cout << "Введите площадь квартиры: ";
+                cin >> area;
+                cout << "Введите адрес квартиры: ";
+                cin.ignore(); // Очистка буфера
+                getline(cin, address);
+                cout << "Введите имя владельца: ";
+                getline(cin, ownerName);
 
-    sortArray(array, size);
+                apartments.emplace_back(rooms, area, address, ownerName);
+                cout << "Квартира добавлена.\n";
+                break;
+            }
+            case 3: {
+                int index;
+                cout << "Введите индекс квартиры для редактирования (0-" << apartments.size() - 1 << "): ";
+                cin >> index;
 
-    std::cout << "Отсортированный массив:\n";
-    for (int i = 0; i < size; i++) {
-        std::cout << array[i] << " ";
-    }
-    std::cout << std::endl;
+                if (index >= 0 && index < apartments.size()) {
+                    int field;
+                    cout << "Выберите поле для редактирования:\n";
+                    cout << "1. Количество комнат\n";
+                    cout << "2. Площадь\n";
+                    cout << "3. Адрес\n";
+                    cout << "4. Имя владельца\n";
+                    cout << "Ваш выбор: ";
+                    cin >> field;
 
-    delete[] array;
+                    switch (field) {
+                        case 1: {
+                            int rooms;
+                            cout << "Введите новое количество комнат: ";
+                            cin >> rooms;
+                            apartments[index].setNumberOfRooms(rooms);
+                            break;
+                        }
+                        case 2: {
+                            double area;
+                            cout << "Введите новую площадь: ";
+                            cin >> area;
+                            apartments[index].setArea(area);
+                            break;
+                        }
+                        case 3: {
+                            string addr;
+                            cout << "Введите новый адрес: ";
+                            cin.ignore(); 
+                                                        
+                            getline(cin, addr);
+                            apartments[index].setAddress(addr);
+                            break;
+                        }
+                        case 4: {
+                            string owner;
+                            cout << "Введите новое имя владельца: ";
+                            cin.ignore(); 
+                            getline(cin, owner);
+                            apartments[index].setOwnerName(owner);
+                            break;
+                        }
+                        default:
+                            cout << "Неверный выбор.\n";
+                    }
+                    cout << "Квартира успешно отредактирована.\n";
+                } else {
+                    cout << "Некорректный индекс.\n";
+                }
+                break;
+            }
+            case 4: {
+                cout << "Информация о всех квартирах:\n";
+                for (const auto& apartment : apartments) {
+                    apartment.displayInfo();
+                }
+                break;
+            }
+            case 5: {
+                sort(apartments.begin(), apartments.end(), [](const Apartment& a, const Apartment& b) {
+                    return a.getArea() < b.getArea();
+                });
+                cout << "Квартиры отсортированы по площади.\n";
+                break;
+            }
+            case 6: {
+                cout << "Завершение работы программы.\n";
+                break;
+            }
+            default:
+                cout << "Неверный выбор. Пожалуйста, попробуйте снова.\n";
+        }
+    } while (choice != 6);
 
-    return 0;
-}
-
-//2.
-#include <iostream>
-
-double calculateAverage(double* array, size_t size) {
-    if (size == 0) {
-        return 0.0; 
-    }
-
-    double sum = 0.0;
-    for (size_t i = 0; i < size; ++i) {
-        sum += array[i];
-    }
-
-    return sum / size; 
-}
-
-int main() {
-    size_t size;
-    std::cout << "Введите размер массива: ";
-    std::cin >> size;
-
-    double* array = new double[size];
-
-    std::cout << "Введите элементы массива:\n";
-    for (size_t i = 0; i < size; ++i) {
-        std::cin >> array[i];
-    }
-
-    double average = calculateAverage(array, size);
-    std::cout << "Среднее арифметическое: " << average << std::endl;
-
-    delete[] array;
-
-    return 0;
 }
