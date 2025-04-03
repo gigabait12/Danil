@@ -1,145 +1,52 @@
 #include <iostream>
-#include <vector>
-#include <memory>
-#include <cmath>
+#include <string>
 
 using namespace std;
 
-class Shape {
-protected:
-    static int idCounter;
-    int id;
-
+class IStringAnalyzer {
 public:
-    Shape() : id(++idCounter) {}
-    virtual double area() const = 0;
-    virtual void printInfo() const = 0;
-    virtual ~Shape() {}
-    int getId() const { return id; }
+    virtual int analyse(const string& str) = 0;
+    virtual ~IStringAnalyzer() {}
 };
 
-int Shape::idCounter = 0;
-
-class Circle : public Shape {
-private:
-    double radius;
-
+class LowercaseAnalyzer : public IStringAnalyzer {
 public:
-    Circle(double r) : radius(r) {}
-    double area() const override {
-        return M_PI * radius * radius;
+    int analyse(const string& str) override {
+        int count = 0;
+        for (char c : str) {
+            if (islower(c)) {
+                count++;
+            }
+        }
+        return count;
     }
-    void printInfo() const override {
-        cout << "Circle ID: " << id << ", Radius: " << radius << ", Area: " << area() << endl;
-    }
-    ~Circle() {}
 };
 
-class Sphere : public Circle {
+class UppercaseAnalyzer : public IStringAnalyzer {
 public:
-    Sphere(double r) : Circle(r) {}
-    double volume() const {
-        return (4.0 / 3.0) * M_PI * pow(radius, 3);
+    int analyse(const string& str) override {
+        int count = 0;
+        for (char c : str) {
+            if (isupper(c)) {
+                count++;
+            }
+        }
+        return count;
     }
-    void printInfo() const override {
-        Circle::printInfo();
-        cout << "Volume: " << volume() << endl;
-    }
-    ~Sphere() {}
 };
-
-class Rectangle : public Shape {
-private:
-    double width;
-    double height;
-
-public:
-    Rectangle(double w, double h) : width(w), height(h) {}
-    double area() const override {
-        return width * height;
-    }
-    void printInfo() const override {
-        cout << "Rectangle ID: " << id << ", Width: " << width << ", Height: " << height << ", Area: " << area() << endl;
-    }
-    ~Rectangle() {}
-};
-
-class Cuboid : public Rectangle {
-public:
-    Cuboid(double w, double h) : Rectangle(w, h) {}
-    double volume() const {
-        return area() * height;
-    }
-    void printInfo() const override {
-        Rectangle::printInfo();
-        cout << "Volume: " << volume() << endl;
-    }
-    ~Cuboid() {}
-};
-
-bool operator==(const Shape& a, const Shape& b) {
-    return a.getId() == b.getId();
-}
-
-Shape& operator+(const Shape& a, const Shape& b) {
-    return *(new Rectangle(a.area(), b.area()));
-}
 
 int main() {
-    vector<shared_ptr<Shape>> shapes;
-    int choice;
+    string input;
+    cout << "Введите строку (только латинские буквы): ";
+    cin >> input;
 
-    do {
-        cout << "\nМеню:\n";
-        cout << "1. Добавить круг\n";
-        cout << "2. Добавить сферу\n";
-        cout << "3. Добавить прямоугольник\n";
-        cout << "4. Добавить кубоид\n";
-        cout << "5. Вывести информацию о фигурах\n";
-        cout << "6. Завершить работу\n";
-        cout << "Выберите пункт меню: ";
-        cin >> choice;
+    LowercaseAnalyzer lowercaseAnalyzer;
+    UppercaseAnalyzer uppercaseAnalyzer;
 
-        switch (choice) {
-            case 1: {
-                double radius;
-                cout << "Введите радиус круга: ";
-                cin >> radius;
-                shapes.push_back(make_shared<Circle>(radius));
-                break;
-            }
-            case 2: {
-                double radius;
-                cout << "Введите радиус сферы: ";
-                cin >> radius;
-                shapes.push_back(make_shared<Sphere>(radius));
-                break;
-            }
-            case 3: {
-                double width, height;
-                cout << "Введите ширину и высоту прямоугольника: ";
-                cin >> width >> height;
-                shapes.push_back(make_shared<Rectangle>(width, height));
-                break;
-            }
-            case 4: {
-                double width, height;
-                cout << "Введите ширину и высоту кубоида: ";
-                cin >> width >> height;
-                shapes.push_back(make_shared<Cuboid>(width, height));
-                break;
-            }
-            case 5: {
-                for (const auto& shape : shapes) {
-                    shape->printInfo();
-                }
-                break;
-            }
-            case 6:
-                cout << "Завершение работы." << endl;
-                break;
-            default:
-                cout << "Неверный выбор. Пожалуйста, попробуйте снова." << endl;
-        }
-    } while (choice != 6);
+    int lowercaseCount = lowercaseAnalyzer.analyse(input);
+    int uppercaseCount = uppercaseAnalyzer.analyse(input);
+
+    cout << "Количество строчных символов: " << lowercaseCount << endl;
+    cout << "Количество заглавных символов: " << uppercaseCount << endl;
+
 }
