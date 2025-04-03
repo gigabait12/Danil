@@ -1,173 +1,71 @@
 #include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
+#include <stdexcept>
 #include <locale>
 
 using namespace std;
 
-class Apartment {
+class DynamicArray {
 private:
-    int numberOfRooms; 
-    double area;       
-    string address;    
-    string ownerName;  
+    int* data;
+    size_t size;
 
 public:
-    Apartment() : numberOfRooms(0), area(0.0), address(""), ownerName("") {}
-
-    Apartment(int rooms, double area, string addr, string owner)
-        : numberOfRooms(rooms), area(area), address(addr), ownerName(owner) {}
-
-    int getNumberOfRooms() const { return numberOfRooms; }
-    double getArea() const { return area; }
-    string getAddress() const { return address; }
-    string getOwnerName() const { return ownerName; }
-
-    void setNumberOfRooms(int rooms) { numberOfRooms = rooms; }
-    void setArea(double area) { this->area = area; }
-    void setAddress(const string& addr) { address = addr; }
-    void setOwnerName(const string& owner) { ownerName = owner; }
-
-    string getApartmentClass() const {
-        if (area < 30) {
-            return "Маленькая квартира";
-        } else if (area < 60) {
-            return "Средняя квартира";
-        } else {
-            return "Большая квартира";
-        }
+    DynamicArray(size_t initialSize = 0) : size(initialSize) {
+        data = new int[size];
+        cout << "Конструктор: создан массив размером " << size << endl;
     }
 
-    void displayInfo() const {
-        cout << "Адрес: " << address << ", Владелец: " << ownerName
-             << ", Количество комнат: " << numberOfRooms
-             << ", Площадь: " << area << " м²"
-             << ", Класс квартиры: " << getApartmentClass() << endl;
+    ~DynamicArray() {
+        delete[] data;
+        cout << "Деструктор: массив уничтожен" << endl;
+    }
+
+    DynamicArray(const DynamicArray& other) : size(other.size + 1) {
+        data = new int[size];
+        for (size_t i = 0; i < other.size; ++i) {
+            data[i] = other.data[i] + 1;
+        }
+        cout << "Конструктор копирования: скопирован массив размером " << other.size << endl;
+    }
+
+    void set(size_t index, int value) {
+        if (index >= size) {
+            throw out_of_range("Индекс вне диапазона");
+        }
+        data[index] = value;
+    }
+
+    int get(size_t index) const {
+        if (index >= size) {
+            throw out_of_range("Индекс вне диапазона");
+        }
+        return data[index];
+    }
+
+    size_t getSize() const {
+        return size;
     }
 };
 
-void displayMenu() {
-    cout << "1. Добавить пустую квартиру\n";
-    cout << "2. Добавить квартиру с данными\n";
-    cout << "3. Редактировать квартиру\n";
-    cout << "4. Вывести информацию о всех квартирах\n";
-    cout << "5. Сортировать квартиры по площади\n";
-    cout << "6. Завершить работу\n";
-}
-
 int main() {
     setlocale(LC_ALL, "rus");
-    vector<Apartment> apartments;
-    int choice;
 
-    do {
-        displayMenu();
-        cout << "Выберите пункт меню: ";
-        cin >> choice;
+    DynamicArray arr1(5);
+    for (size_t i = 0; i < arr1.getSize(); ++i) {
+        arr1.set(i, i + 1);
+    }
 
-        switch (choice) {
-            case 1: {
-                apartments.emplace_back(); 
-                cout << "Пустая квартира добавлена.\n";
-                break;
-            }
-            case 2: {
-                int rooms;
-                double area;
-                string address, ownerName;
+    DynamicArray arr2 = arr1;
 
-                cout << "Введите количество комнат: ";
-                cin >> rooms;
-                cout << "Введите площадь квартиры: ";
-                cin >> area;
-                cout << "Введите адрес квартиры: ";
-                cin.ignore(); // Очистка буфера
-                getline(cin, address);
-                cout << "Введите имя владельца: ";
-                getline(cin, ownerName);
+    cout << "Элементы arr1:" << endl;
+    for (size_t i = 0; i < arr1.getSize(); ++i) {
+        cout << arr1.get(i) << " ";
+    }
+    cout << endl;
 
-                apartments.emplace_back(rooms, area, address, ownerName);
-                cout << "Квартира добавлена.\n";
-                break;
-            }
-            case 3: {
-                int index;
-                cout << "Введите индекс квартиры для редактирования (0-" << apartments.size() - 1 << "): ";
-                cin >> index;
-
-                if (index >= 0 && index < apartments.size()) {
-                    int field;
-                    cout << "Выберите поле для редактирования:\n";
-                    cout << "1. Количество комнат\n";
-                    cout << "2. Площадь\n";
-                    cout << "3. Адрес\n";
-                    cout << "4. Имя владельца\n";
-                    cout << "Ваш выбор: ";
-                    cin >> field;
-
-                    switch (field) {
-                        case 1: {
-                            int rooms;
-                            cout << "Введите новое количество комнат: ";
-                            cin >> rooms;
-                            apartments[index].setNumberOfRooms(rooms);
-                            break;
-                        }
-                        case 2: {
-                            double area;
-                            cout << "Введите новую площадь: ";
-                            cin >> area;
-                            apartments[index].setArea(area);
-                            break;
-                        }
-                        case 3: {
-                            string addr;
-                            cout << "Введите новый адрес: ";
-                            cin.ignore(); 
-                                                        
-                            getline(cin, addr);
-                            apartments[index].setAddress(addr);
-                            break;
-                        }
-                        case 4: {
-                            string owner;
-                            cout << "Введите новое имя владельца: ";
-                            cin.ignore(); 
-                            getline(cin, owner);
-                            apartments[index].setOwnerName(owner);
-                            break;
-                        }
-                        default:
-                            cout << "Неверный выбор.\n";
-                    }
-                    cout << "Квартира успешно отредактирована.\n";
-                } else {
-                    cout << "Некорректный индекс.\n";
-                }
-                break;
-            }
-            case 4: {
-                cout << "Информация о всех квартирах:\n";
-                for (const auto& apartment : apartments) {
-                    apartment.displayInfo();
-                }
-                break;
-            }
-            case 5: {
-                sort(apartments.begin(), apartments.end(), [](const Apartment& a, const Apartment& b) {
-                    return a.getArea() < b.getArea();
-                });
-                cout << "Квартиры отсортированы по площади.\n";
-                break;
-            }
-            case 6: {
-                cout << "Завершение работы программы.\n";
-                break;
-            }
-            default:
-                cout << "Неверный выбор. Пожалуйста, попробуйте снова.\n";
-        }
-    } while (choice != 6);
-
+    cout << "Элементы arr2:" << endl;
+    for (size_t i = 0; i < arr2.getSize(); ++i) {
+        cout << arr2.get(i) << " ";
+    }
+    cout << endl;
 }
