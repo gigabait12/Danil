@@ -1,43 +1,42 @@
 #include <iostream>
-#include <string>
 
 using namespace std;
 
-class Animal {
+class ClassA;
+
+class ClassB {
 private:
-    string name;
-    int weight;
-protected:
-    string type;
+    int b1;
+    int b2;
 
 public:
-    Animal(const string& name, int weight) : name(name), weight(weight) {}
+    ClassB(int x, int y) : b1(x), b2(y) {}
 
-    void print() const {
-        cout << "Имя: " << name << ", Вес: " << weight << " кг" << endl;
-    }
+    friend void add(const ClassA& a, const ClassB& b);
 };
 
-class Cat : public Animal {
+class ClassA {
+private:
+    int a1;
+    int a2;
+
 public:
-    Cat(const string& name, int weight) : Animal(name, weight) {
-        type = "Кошка";
-    }
+    ClassA(int x, int y) : a1(x), a2(y) {}
+
+    friend void add(const ClassA& a, const ClassB& b);
 };
 
-class Dog : public Animal {
-public:
-    Dog(const string& name, int weight) : Animal(name, weight) {
-        type = "Собака";
-    }
-};
+void add(const ClassA& a, const ClassB& b) {
+    int sumA = a.a1 + a.a2;
+    int sumB = b.b1 + b.b2;
+    cout << "Сумма полей ClassA: " << sumA << endl;
+    cout << "Сумма полей ClassB: " << sumB << endl;
+    cout << "Общая сумма: " << sumA + sumB << endl;
+}
 
 int main() {
-    Cat cat1("Мурка", 4);
-    Dog dog1("Шарик", 10);
+    ClassA objA(3, 5);
+    ClassB objB(2, 4);
 
-    cat1.print();
-    dog1.print();
-
-    return 0;
+    add(objA, objB);
 }
