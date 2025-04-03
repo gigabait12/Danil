@@ -1,94 +1,47 @@
-Задание 1: Подсчитать количество строк в файле
 #include <iostream>
-#include <fstream>
-#include <string>
-
-using namespace std;
-
-int main() {
-    ifstream file("input.txt");
-    if (!file.is_open()) {
-        cout << "Не удалось открыть файл." << endl;
-        return 1;
-    }
-
-    int lineCount = 0;
-    string line;
-    while (getline(file, line)) {
-        lineCount++;
-    }
-
-    file.close();
-    cout << "Количество строк в файле: " << lineCount << endl;
-}
-Задание 2: Посчитать гласные буквы в каждой строке файла
-
-#include <iostream>
-#include <fstream>
-#include <string>
-
-using namespace std;
-
-bool isVowel(char c) {
-    c = tolower(c);
-    return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
-}
-
-int main() {
-    ifstream file("input.txt");
-    if (!file.is_open()) {
-        cout << "Не удалось открыть файл." << endl;
-        return 1;
-    }
-
-    string line;
-    int lineNumber = 0;
-    while (getline(file, line)) {
-        lineNumber++;
-        int vowelCount = 0;
-        for (char c : line) {
-            if (isVowel(c)) {
-                vowelCount++;
-            }
-        }
-        cout << "Строка " << lineNumber << ": " << vowelCount << " гласных" << endl;
-    }
-
-    file.close();
-}
-Задание 3: Создать первый файл, заполнить его случайными числами и скопировать содержимое во второй файл
-#include <iostream>
-#include <fstream>
+#include <vector>
 #include <cstdlib>
 #include <ctime>
 
 using namespace std;
 
+struct Card {
+    string rank;
+    string suit;
+};
+
+vector<Card> createDeck() {
+    vector<Card> deck;
+    string ranks[] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Валет", "Дама", "Король", "Туз"};
+    string suits[] = {"Черви", "Бубны", "Пики", "Крести"};
+
+    for (const string& suit : suits) {
+        for (const string& rank : ranks) {
+            deck.push_back({rank, suit});
+        }
+    }
+    return deck;
+}
+
+void drawCard(vector<Card>& deck) {
+    if (deck.empty()) {
+        cout << "Нет больше карт." << endl;
+        return;
+    }
+
+    int index = rand() % deck.size();
+    Card drawnCard = deck[index];
+    cout << drawnCard.rank << " " << drawnCard.suit << endl;
+    deck.erase(deck.begin() + index);
+}
+
 int main() {
-    ofstream file1("file1.txt");
-    if (!file1.is_open()) {
-        cout << "Не удалось создать файл 1." << endl;
-        return 1;
-    }
-
     srand(static_cast<unsigned int>(time(0)));
-    for (int i = 0; i < 10; i++) {
-        file1 << rand() % 100 << endl;
-    }
-    file1.close();
+    vector<Card> deck = createDeck();
 
-    ifstream file2("file1.txt");
-    ofstream fileCopy("file2.txt");
-    if (!file2.is_open() || !fileCopy.is_open()) {
-        cout << "Не удалось открыть файлы." << endl;
-        return 1;
+    for (int i = 0; i < 53; i++) {
+        cout << "Нажмите Enter для получения карты...";
+        cin.get();
+        drawCard(deck);
     }
-
-    string line;
-    while (getline(file2, line)) {
-        fileCopy << line << endl;
-    }
-
-    file2.close();
-    fileCopy.close();
 }
