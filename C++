@@ -1,55 +1,6 @@
-1:
 #include <iostream>
-#include <limits>
-
-using namespace std;
-
-float celsiusToFahrenheit(float celsius) {
-    return (celsius * 9.0 / 5.0) + 32.0;
-}
-
-float fahrenheitToCelsius(float fahrenheit) {
-    return (fahrenheit - 32.0) * 5.0 / 9.0;
-}
-
-int main() {
-    int choice;
-    float temperature;
-
-    do {
-        cout << "\nМеню:\n";
-        cout << "1. Перевести Цельсий в Фаренгейт\n";
-        cout << "2. Перевести Фаренгейт в Цельсий\n";
-        cout << "3. Завершить работу\n";
-        cout << "Выберите пункт меню: ";
-        cin >> choice;
-
-        switch (choice) {
-            case 1:
-                cout << "Введите температуру в градусах Цельсия: ";
-                cin >> temperature;
-                cout << "Температура в Фаренгейтах: " << celsiusToFahrenheit(temperature) << endl;
-                cout << "Температура в Фаренгейтах (целое): " << static_cast<int>(celsiusToFahrenheit(temperature)) << endl;
-                break;
-            case 2:
-                cout << "Введите температуру в Фаренгейтах: ";
-                cin >> temperature;
-                cout << "Температура в Цельсиях: " << fahrenheitToCelsius(temperature) << endl;
-                cout << "Температура в Цельсиях (целое): " << static_cast<int>(fahrenheitToCelsius(temperature)) << endl;
-                break;
-            case 3:
-                cout << "Завершение работы." << endl;
-                break;
-            default:
-                cout << "Неверный выбор. Пожалуйста, попробуйте снова." << endl;
-        }
-    } while (choice != 3);
-}
-2:
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -59,9 +10,15 @@ protected:
     int year;
 
 public:
-    Vehicle(const string& brand, int year) : brand(brand), year(year) {}
-    virtual void printInfo() const = 0; // Чисто виртуальная функция
-    virtual ~Vehicle() {}
+    Vehicle(const string& brand, int year) : brand(brand), year(year) {
+        cout << "Создан транспортное средство: " << brand << ", Год: " << year << endl;
+    }
+
+    virtual void printInfo() const = 0;
+
+    virtual ~Vehicle() {
+        cout << "Уничтожено транспортное средство: " << brand << endl;
+    }
 };
 
 class Car : public Vehicle {
@@ -70,38 +27,57 @@ private:
 
 public:
     Car(const string& brand, int year, int numberOfDoors)
-        : Vehicle(brand, year), numberOfDoors(numberOfDoors) {}
+        : Vehicle(brand, year), numberOfDoors(numberOfDoors) {
+        cout << "Создан легковой автомобиль: " << brand << ", Год: " << year
+             << ", Количество дверей: " << numberOfDoors << endl;
+    }
 
     void printInfo() const override {
         cout << "Легковой автомобиль: " << brand << ", Год: " << year
              << ", Количество дверей: " << numberOfDoors << endl;
     }
+
+    ~Car() {
+        cout << "Уничтожен легковой автомобиль: " << brand << endl;
+    }
 };
 
-class Truck : public Vehicle {
+class Bike : public Vehicle {
 private:
-    int loadCapacity;
+    bool hasBasket;
 
 public:
-    Truck(const string& brand, int year, int loadCapacity)
-        : Vehicle(brand, year), loadCapacity(loadCapacity) {}
+    Bike(const string& brand, int year, bool hasBasket)
+        : Vehicle(brand, year), hasBasket(hasBasket) {
+        cout << "Создан велосипед: " << brand << ", Год: " << year
+             << ", Наличие корзины: " << (hasBasket ? "Да" : "Нет") << endl;
+    }
 
     void printInfo() const override {
-        cout << "Грузовой автомобиль: " << brand << ", Год: " << year
-             << ", Грузоподъемность: " << loadCapacity << " кг" << endl;
+        cout << "Велосипед: " << brand << ", Год: " << year
+             << ", Наличие корзины: " << (hasBasket ? "Да" : "Нет") << endl;
+    }
+
+    ~Bike() {
+        cout << "Уничтожен велосипед: " << brand << endl;
     }
 };
 
 int main() {
-    vector<shared_ptr<Vehicle>> fleet;
+    const int fleetSize = 4;
+    Vehicle* fleet[fleetSize];
 
-    fleet.push_back(make_shared<Car>("Toyota", 2020, 4));
-    fleet.push_back(make_shared<Truck>("Volvo", 2018, 10000));
-    fleet.push_back(make_shared<Car>("Honda", 2021, 2));
-    fleet.push_back(make_shared<Truck>("Mercedes", 2019, 15000));
+    fleet[0] = new Car("Toyota", 2020, 4);
+    fleet[1] = new Bike("Giant", 2019, true);
+    fleet[2] = new Car("Honda", 2021, 2);
+    fleet[3] = new Bike("Trek", 2020, false);
 
-    cout << "Информация об автомобилях в автопарке:" << endl;
-    for (const auto& vehicle : fleet) {
-        vehicle->printInfo();
+    cout << "\nИнформация о транспортных средствах в автопарке:" << endl;
+    for (int i = 0; i < fleetSize; ++i) {
+        fleet[i]->printInfo();
+    }
+
+    for (int i = 0; i < fleetSize; ++i) {
+        delete fleet[i];
     }
 }
