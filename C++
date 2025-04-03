@@ -22,10 +22,11 @@ public:
 
     DynamicArray(const DynamicArray& other) : size(other.size + 1) {
         data = new int[size];
+        cout << "Конструктор копирования: скопирован массив размером " << other.size << endl;
         for (size_t i = 0; i < other.size; ++i) {
             data[i] = other.data[i] + 1;
+            cout << "Копирование элемента " << i << ": " << other.data[i] << " -> " << data[i] << endl;
         }
-        cout << "Конструктор копирования: скопирован массив размером " << other.size << endl;
     }
 
     void set(size_t index, int value) {
