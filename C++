@@ -1,52 +1,94 @@
+Задание 1: Подсчитать количество строк в файле
 #include <iostream>
+#include <fstream>
 #include <string>
 
 using namespace std;
 
-class IStringAnalyzer {
-public:
-    virtual int analyse(const string& str) = 0;
-    virtual ~IStringAnalyzer() {}
-};
-
-class LowercaseAnalyzer : public IStringAnalyzer {
-public:
-    int analyse(const string& str) override {
-        int count = 0;
-        for (char c : str) {
-            if (islower(c)) {
-                count++;
-            }
-        }
-        return count;
+int main() {
+    ifstream file("input.txt");
+    if (!file.is_open()) {
+        cout << "Не удалось открыть файл." << endl;
+        return 1;
     }
-};
 
-class UppercaseAnalyzer : public IStringAnalyzer {
-public:
-    int analyse(const string& str) override {
-        int count = 0;
-        for (char c : str) {
-            if (isupper(c)) {
-                count++;
-            }
-        }
-        return count;
+    int lineCount = 0;
+    string line;
+    while (getline(file, line)) {
+        lineCount++;
     }
-};
+
+    file.close();
+    cout << "Количество строк в файле: " << lineCount << endl;
+}
+Задание 2: Посчитать гласные буквы в каждой строке файла
+
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+bool isVowel(char c) {
+    c = tolower(c);
+    return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
+}
 
 int main() {
-    string input;
-    cout << "Введите строку (только латинские буквы): ";
-    cin >> input;
+    ifstream file("input.txt");
+    if (!file.is_open()) {
+        cout << "Не удалось открыть файл." << endl;
+        return 1;
+    }
 
-    LowercaseAnalyzer lowercaseAnalyzer;
-    UppercaseAnalyzer uppercaseAnalyzer;
+    string line;
+    int lineNumber = 0;
+    while (getline(file, line)) {
+        lineNumber++;
+        int vowelCount = 0;
+        for (char c : line) {
+            if (isVowel(c)) {
+                vowelCount++;
+            }
+        }
+        cout << "Строка " << lineNumber << ": " << vowelCount << " гласных" << endl;
+    }
 
-    int lowercaseCount = lowercaseAnalyzer.analyse(input);
-    int uppercaseCount = uppercaseAnalyzer.analyse(input);
+    file.close();
+}
+Задание 3: Создать первый файл, заполнить его случайными числами и скопировать содержимое во второй файл
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
 
-    cout << "Количество строчных символов: " << lowercaseCount << endl;
-    cout << "Количество заглавных символов: " << uppercaseCount << endl;
+using namespace std;
 
+int main() {
+    ofstream file1("file1.txt");
+    if (!file1.is_open()) {
+        cout << "Не удалось создать файл 1." << endl;
+        return 1;
+    }
+
+    srand(static_cast<unsigned int>(time(0)));
+    for (int i = 0; i < 10; i++) {
+        file1 << rand() % 100 << endl;
+    }
+    file1.close();
+
+    ifstream file2("file1.txt");
+    ofstream fileCopy("file2.txt");
+    if (!file2.is_open() || !fileCopy.is_open()) {
+        cout << "Не удалось открыть файлы." << endl;
+        return 1;
+    }
+
+    string line;
+    while (getline(file2, line)) {
+        fileCopy << line << endl;
+    }
+
+    file2.close();
+    fileCopy.close();
 }
