@@ -1,72 +1,43 @@
 #include <iostream>
-#include <stdexcept>
-#include <locale>
+#include <string>
 
 using namespace std;
 
-class DynamicArray {
+class Animal {
 private:
-    int* data;
-    size_t size;
+    string name;
+    int weight;
+protected:
+    string type;
 
 public:
-    DynamicArray(size_t initialSize = 0) : size(initialSize) {
-        data = new int[size];
-        cout << "Конструктор: создан массив размером " << size << endl;
-    }
+    Animal(const string& name, int weight) : name(name), weight(weight) {}
 
-    ~DynamicArray() {
-        delete[] data;
-        cout << "Деструктор: массив уничтожен" << endl;
+    void print() const {
+        cout << "Имя: " << name << ", Вес: " << weight << " кг" << endl;
     }
+};
 
-    DynamicArray(const DynamicArray& other) : size(other.size + 1) {
-        data = new int[size];
-        cout << "Конструктор копирования: скопирован массив размером " << other.size << endl;
-        for (size_t i = 0; i < other.size; ++i) {
-            data[i] = other.data[i] + 1;
-            cout << "Копирование элемента " << i << ": " << other.data[i] << " -> " << data[i] << endl;
-        }
+class Cat : public Animal {
+public:
+    Cat(const string& name, int weight) : Animal(name, weight) {
+        type = "Кошка";
     }
+};
 
-    void set(size_t index, int value) {
-        if (index >= size) {
-            throw out_of_range("Индекс вне диапазона");
-        }
-        data[index] = value;
-    }
-
-    int get(size_t index) const {
-        if (index >= size) {
-            throw out_of_range("Индекс вне диапазона");
-        }
-        return data[index];
-    }
-
-    size_t getSize() const {
-        return size;
+class Dog : public Animal {
+public:
+    Dog(const string& name, int weight) : Animal(name, weight) {
+        type = "Собака";
     }
 };
 
 int main() {
-    setlocale(LC_ALL, "rus");
+    Cat cat1("Мурка", 4);
+    Dog dog1("Шарик", 10);
 
-    DynamicArray arr1(5);
-    for (size_t i = 0; i < arr1.getSize(); ++i) {
-        arr1.set(i, i + 1);
-    }
+    cat1.print();
+    dog1.print();
 
-    DynamicArray arr2 = arr1;
-
-    cout << "Элементы arr1:" << endl;
-    for (size_t i = 0; i < arr1.getSize(); ++i) {
-        cout << arr1.get(i) << " ";
-    }
-    cout << endl;
-
-    cout << "Элементы arr2:" << endl;
-    for (size_t i = 0; i < arr2.getSize(); ++i) {
-        cout << arr2.get(i) << " ";
-    }
-    cout << endl;
+    return 0;
 }
