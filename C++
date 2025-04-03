@@ -1,42 +1,164 @@
 #include <iostream>
+#include <vector>
+#include <string>
+#include <limits>
+#include <memory>
 
 using namespace std;
 
-class ClassA;
-
-class ClassB {
-private:
-    int b1;
-    int b2;
+class Item {
+protected:
+    int id;
+    string name;
 
 public:
-    ClassB(int x, int y) : b1(x), b2(y) {}
+    Item() : id(0), name("Unnamed") {}
+    Item(int id, const string& name) : id(id), name(name) {}
 
-    friend void add(const ClassA& a, const ClassB& b);
+    virtual void print() const {
+        cout << "ID: " << id << ", Name: " << name;
+    }
+
+    virtual ~Item() {}
+
+    bool operator==(const Item& other) const {
+        return id == other.id;
+    }
+
+    Item& operator++() {
+        ++id;
+        return *this;
+    }
 };
 
-class ClassA {
-private:
-    int a1;
-    int a2;
+class Product : public Item {
+protected:
+    double price;
 
 public:
-    ClassA(int x, int y) : a1(x), a2(y) {}
+    Product() : Item(), price(0.0) {}
+    Product(int id, const string& name, double price) : Item(id, name), price(price) {}
 
-    friend void add(const ClassA& a, const ClassB& b);
+    void print() const override {
+        Item::print();
+        cout << ", Price: " << price;
+    }
 };
 
-void add(const ClassA& a, const ClassB& b) {
-    int sumA = a.a1 + a.a2;
-    int sumB = b.b1 + b.b2;
-    cout << "Сумма полей ClassA: " << sumA << endl;
-    cout << "Сумма полей ClassB: " << sumB << endl;
-    cout << "Общая сумма: " << sumA + sumB << endl;
+class DairyProduct : public Product {
+private:
+    int shelfLife;
+
+public:
+    DairyProduct() : Product(), shelfLife(0) {}
+    DairyProduct(int id, const string& name, double price, int shelfLife) : Product(id, name, price), shelfLife(shelfLife) {}
+
+    void print() const override {
+        Product::print();
+        cout << ", Shelf Life: " << shelfLife << " days";
+    }
+};
+
+class Toy : public Item {
+private:
+    string material;
+
+public:
+    Toy() : Item(), material("Unknown") {}
+    Toy(int id, const string& name, const string& material) : Item(id, name), material(material) {}
+
+    void print() const override {
+        Item::print();
+        cout << ", Material: " << material;
+    }
+};
+
+int getIntInput(const string& prompt, int min = numeric_limits<int>::min(), int max = numeric_limits<int>::max()) {
+    int value;
+    while (true) {
+        cout << prompt;
+        cin >> value;
+        if (cin.fail() || value < min || value > max) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Неверный ввод. Пожалуйста, попробуйте снова." << endl;
+        } else {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return value;
+        }
+    }
+}
+
+string getStringInput(const string& prompt) {
+    string value;
+    cout << prompt;
+    getline(cin, value);
+    return value;
 }
 
 int main() {
-    ClassA objA(3, 5);
-    ClassB objB(2, 4);
+    vector<shared_ptr<Item>> items;
+    int choice;
 
-    add(objA, objB);
+    do {
+        cout << "\nМеню:\n";
+        cout << "1. Добавить новый элемент\n";
+        cout << "2. Удалить элемент по индексу\n";
+        cout << "3. Вывод всех элементов\n";
+        cout << "4. Сравнение двух элементов на равенство\n";
+        cout << "5. Завершение работы\n";
+        cout << "Выберите пункт меню: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                int type = getIntInput("Выберите тип (1 - Продукт, 2 - Молочный продукт, 3 - Игрушка): ", 1, 3);
+                int id = getIntInput("Введите ID: ");
+                string name = getStringInput("Введите имя: ");
+
+                if (type == 1) {
+                    double price = getIntInput("Введите цену: ", 0);
+                    items.push_back(make_shared<Product>(id, name, price));
+                } else if (type == 2) {
+                    double price = getIntInput("Введите цену: ", 0);
+                    int shelfLife = getIntInput("Введите срок хранения (дни): ", 0);
+                    items.push_back(make_shared<DairyProduct>(id, name, price, shelfLife));
+                } else if (type == 3) {
+                    string material = getStringInput("Введите материал: ");
+                    items.push_back(make_shared<Toy>(id, name, material));
+                }
+                break;
+            }
+            case 2: {
+                int index = getIntInput("Введите индекс элемента для удаления: ", 0, items.size() - 1);
+                items.erase(items.begin() + index);
+                cout << "Элемент удален." << endl;
+                break;
+            }
+            case 3: {
+                for (size_t i = 0; i < items.size();
+             for (size_t i = 0; i < items.size(); ++i) {
+                    cout << "Элемент " << i << ": ";
+                    items[i]->print();
+                    cout << endl;
+                }
+                break;
+            }
+            case 4: {
+                int index1 = getIntInput("Введите индекс первого элемента для сравнения: ", 0, items.size() - 1);
+                int index2 = getIntInput("Введите индекс второго элемента для сравнения: ", 0, items.size() - 1);
+                if (*items[index1] == *items[index2]) {
+                    cout << "Элементы равны." << endl;
+                } else {
+                    cout << "Элементы не равны." << endl;
+                }
+                break;
+            }
+            case 5:
+                cout << "Завершение работы." << endl;
+                break;
+            default:
+                cout << "Неверный выбор. Пожалуйста, попробуйте снова." << endl;
+        }
+    } while (choice != 5);
 }
