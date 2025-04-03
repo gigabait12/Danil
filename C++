@@ -1,164 +1,107 @@
+1:
 #include <iostream>
-#include <vector>
-#include <string>
 #include <limits>
-#include <memory>
 
 using namespace std;
 
-class Item {
-protected:
-    int id;
-    string name;
-
-public:
-    Item() : id(0), name("Unnamed") {}
-    Item(int id, const string& name) : id(id), name(name) {}
-
-    virtual void print() const {
-        cout << "ID: " << id << ", Name: " << name;
-    }
-
-    virtual ~Item() {}
-
-    bool operator==(const Item& other) const {
-        return id == other.id;
-    }
-
-    Item& operator++() {
-        ++id;
-        return *this;
-    }
-};
-
-class Product : public Item {
-protected:
-    double price;
-
-public:
-    Product() : Item(), price(0.0) {}
-    Product(int id, const string& name, double price) : Item(id, name), price(price) {}
-
-    void print() const override {
-        Item::print();
-        cout << ", Price: " << price;
-    }
-};
-
-class DairyProduct : public Product {
-private:
-    int shelfLife;
-
-public:
-    DairyProduct() : Product(), shelfLife(0) {}
-    DairyProduct(int id, const string& name, double price, int shelfLife) : Product(id, name, price), shelfLife(shelfLife) {}
-
-    void print() const override {
-        Product::print();
-        cout << ", Shelf Life: " << shelfLife << " days";
-    }
-};
-
-class Toy : public Item {
-private:
-    string material;
-
-public:
-    Toy() : Item(), material("Unknown") {}
-    Toy(int id, const string& name, const string& material) : Item(id, name), material(material) {}
-
-    void print() const override {
-        Item::print();
-        cout << ", Material: " << material;
-    }
-};
-
-int getIntInput(const string& prompt, int min = numeric_limits<int>::min(), int max = numeric_limits<int>::max()) {
-    int value;
-    while (true) {
-        cout << prompt;
-        cin >> value;
-        if (cin.fail() || value < min || value > max) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Неверный ввод. Пожалуйста, попробуйте снова." << endl;
-        } else {
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            return value;
-        }
-    }
+float celsiusToFahrenheit(float celsius) {
+    return (celsius * 9.0 / 5.0) + 32.0;
 }
 
-string getStringInput(const string& prompt) {
-    string value;
-    cout << prompt;
-    getline(cin, value);
-    return value;
+float fahrenheitToCelsius(float fahrenheit) {
+    return (fahrenheit - 32.0) * 5.0 / 9.0;
 }
 
 int main() {
-    vector<shared_ptr<Item>> items;
     int choice;
+    float temperature;
 
     do {
         cout << "\nМеню:\n";
-        cout << "1. Добавить новый элемент\n";
-        cout << "2. Удалить элемент по индексу\n";
-        cout << "3. Вывод всех элементов\n";
-        cout << "4. Сравнение двух элементов на равенство\n";
-        cout << "5. Завершение работы\n";
+        cout << "1. Перевести Цельсий в Фаренгейт\n";
+        cout << "2. Перевести Фаренгейт в Цельсий\n";
+        cout << "3. Завершить работу\n";
         cout << "Выберите пункт меню: ";
         cin >> choice;
 
         switch (choice) {
-            case 1: {
-                int type = getIntInput("Выберите тип (1 - Продукт, 2 - Молочный продукт, 3 - Игрушка): ", 1, 3);
-                int id = getIntInput("Введите ID: ");
-                string name = getStringInput("Введите имя: ");
-
-                if (type == 1) {
-                    double price = getIntInput("Введите цену: ", 0);
-                    items.push_back(make_shared<Product>(id, name, price));
-                } else if (type == 2) {
-                    double price = getIntInput("Введите цену: ", 0);
-                    int shelfLife = getIntInput("Введите срок хранения (дни): ", 0);
-                    items.push_back(make_shared<DairyProduct>(id, name, price, shelfLife));
-                } else if (type == 3) {
-                    string material = getStringInput("Введите материал: ");
-                    items.push_back(make_shared<Toy>(id, name, material));
-                }
+            case 1:
+                cout << "Введите температуру в градусах Цельсия: ";
+                cin >> temperature;
+                cout << "Температура в Фаренгейтах: " << celsiusToFahrenheit(temperature) << endl;
+                cout << "Температура в Фаренгейтах (целое): " << static_cast<int>(celsiusToFahrenheit(temperature)) << endl;
                 break;
-            }
-            case 2: {
-                int index = getIntInput("Введите индекс элемента для удаления: ", 0, items.size() - 1);
-                items.erase(items.begin() + index);
-                cout << "Элемент удален." << endl;
+            case 2:
+                cout << "Введите температуру в Фаренгейтах: ";
+                cin >> temperature;
+                cout << "Температура в Цельсиях: " << fahrenheitToCelsius(temperature) << endl;
+                cout << "Температура в Цельсиях (целое): " << static_cast<int>(fahrenheitToCelsius(temperature)) << endl;
                 break;
-            }
-            case 3: {
-                for (size_t i = 0; i < items.size();
-             for (size_t i = 0; i < items.size(); ++i) {
-                    cout << "Элемент " << i << ": ";
-                    items[i]->print();
-                    cout << endl;
-                }
-                break;
-            }
-            case 4: {
-                int index1 = getIntInput("Введите индекс первого элемента для сравнения: ", 0, items.size() - 1);
-                int index2 = getIntInput("Введите индекс второго элемента для сравнения: ", 0, items.size() - 1);
-                if (*items[index1] == *items[index2]) {
-                    cout << "Элементы равны." << endl;
-                } else {
-                    cout << "Элементы не равны." << endl;
-                }
-                break;
-            }
-            case 5:
+            case 3:
                 cout << "Завершение работы." << endl;
                 break;
             default:
                 cout << "Неверный выбор. Пожалуйста, попробуйте снова." << endl;
         }
-    } while (choice != 5);
+    } while (choice != 3);
+}
+2:
+#include <iostream>
+#include <vector>
+#include <memory>
+#include <string>
+
+using namespace std;
+
+class Vehicle {
+protected:
+    string brand;
+    int year;
+
+public:
+    Vehicle(const string& brand, int year) : brand(brand), year(year) {}
+    virtual void printInfo() const = 0; // Чисто виртуальная функция
+    virtual ~Vehicle() {}
+};
+
+class Car : public Vehicle {
+private:
+    int numberOfDoors;
+
+public:
+    Car(const string& brand, int year, int numberOfDoors)
+        : Vehicle(brand, year), numberOfDoors(numberOfDoors) {}
+
+    void printInfo() const override {
+        cout << "Легковой автомобиль: " << brand << ", Год: " << year
+             << ", Количество дверей: " << numberOfDoors << endl;
+    }
+};
+
+class Truck : public Vehicle {
+private:
+    int loadCapacity;
+
+public:
+    Truck(const string& brand, int year, int loadCapacity)
+        : Vehicle(brand, year), loadCapacity(loadCapacity) {}
+
+    void printInfo() const override {
+        cout << "Грузовой автомобиль: " << brand << ", Год: " << year
+             << ", Грузоподъемность: " << loadCapacity << " кг" << endl;
+    }
+};
+
+int main() {
+    vector<shared_ptr<Vehicle>> fleet;
+
+    fleet.push_back(make_shared<Car>("Toyota", 2020, 4));
+    fleet.push_back(make_shared<Truck>("Volvo", 2018, 10000));
+    fleet.push_back(make_shared<Car>("Honda", 2021, 2));
+    fleet.push_back(make_shared<Truck>("Mercedes", 2019, 15000));
+
+    cout << "Информация об автомобилях в автопарке:" << endl;
+    for (const auto& vehicle : fleet) {
+        vehicle->printInfo();
+    }
 }
