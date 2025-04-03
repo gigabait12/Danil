@@ -1,83 +1,145 @@
 #include <iostream>
-#include <string>
 #include <vector>
+#include <memory>
+#include <cmath>
 
 using namespace std;
 
-class Vehicle {
+class Shape {
 protected:
-    string brand;
-    int year;
+    static int idCounter;
+    int id;
 
 public:
-    Vehicle(const string& brand, int year) : brand(brand), year(year) {
-        cout << "Создан транспортное средство: " << brand << ", Год: " << year << endl;
-    }
-
+    Shape() : id(++idCounter) {}
+    virtual double area() const = 0;
     virtual void printInfo() const = 0;
-
-    virtual ~Vehicle() {
-        cout << "Уничтожено транспортное средство: " << brand << endl;
-    }
+    virtual ~Shape() {}
+    int getId() const { return id; }
 };
 
-class Car : public Vehicle {
+int Shape::idCounter = 0;
+
+class Circle : public Shape {
 private:
-    int numberOfDoors;
+    double radius;
 
 public:
-    Car(const string& brand, int year, int numberOfDoors)
-        : Vehicle(brand, year), numberOfDoors(numberOfDoors) {
-        cout << "Создан легковой автомобиль: " << brand << ", Год: " << year
-             << ", Количество дверей: " << numberOfDoors << endl;
+    Circle(double r) : radius(r) {}
+    double area() const override {
+        return M_PI * radius * radius;
     }
-
     void printInfo() const override {
-        cout << "Легковой автомобиль: " << brand << ", Год: " << year
-             << ", Количество дверей: " << numberOfDoors << endl;
+        cout << "Circle ID: " << id << ", Radius: " << radius << ", Area: " << area() << endl;
     }
-
-    ~Car() {
-        cout << "Уничтожен легковой автомобиль: " << brand << endl;
-    }
+    ~Circle() {}
 };
 
-class Bike : public Vehicle {
+class Sphere : public Circle {
+public:
+    Sphere(double r) : Circle(r) {}
+    double volume() const {
+        return (4.0 / 3.0) * M_PI * pow(radius, 3);
+    }
+    void printInfo() const override {
+        Circle::printInfo();
+        cout << "Volume: " << volume() << endl;
+    }
+    ~Sphere() {}
+};
+
+class Rectangle : public Shape {
 private:
-    bool hasBasket;
+    double width;
+    double height;
 
 public:
-    Bike(const string& brand, int year, bool hasBasket)
-        : Vehicle(brand, year), hasBasket(hasBasket) {
-        cout << "Создан велосипед: " << brand << ", Год: " << year
-             << ", Наличие корзины: " << (hasBasket ? "Да" : "Нет") << endl;
+    Rectangle(double w, double h) : width(w), height(h) {}
+    double area() const override {
+        return width * height;
     }
-
     void printInfo() const override {
-        cout << "Велосипед: " << brand << ", Год: " << year
-             << ", Наличие корзины: " << (hasBasket ? "Да" : "Нет") << endl;
+        cout << "Rectangle ID: " << id << ", Width: " << width << ", Height: " << height << ", Area: " << area() << endl;
     }
-
-    ~Bike() {
-        cout << "Уничтожен велосипед: " << brand << endl;
-    }
+    ~Rectangle() {}
 };
+
+class Cuboid : public Rectangle {
+public:
+    Cuboid(double w, double h) : Rectangle(w, h) {}
+    double volume() const {
+        return area() * height;
+    }
+    void printInfo() const override {
+        Rectangle::printInfo();
+        cout << "Volume: " << volume() << endl;
+    }
+    ~Cuboid() {}
+};
+
+bool operator==(const Shape& a, const Shape& b) {
+    return a.getId() == b.getId();
+}
+
+Shape& operator+(const Shape& a, const Shape& b) {
+    return *(new Rectangle(a.area(), b.area()));
+}
 
 int main() {
-    const int fleetSize = 4;
-    Vehicle* fleet[fleetSize];
+    vector<shared_ptr<Shape>> shapes;
+    int choice;
 
-    fleet[0] = new Car("Toyota", 2020, 4);
-    fleet[1] = new Bike("Giant", 2019, true);
-    fleet[2] = new Car("Honda", 2021, 2);
-    fleet[3] = new Bike("Trek", 2020, false);
+    do {
+        cout << "\nМеню:\n";
+        cout << "1. Добавить круг\n";
+        cout << "2. Добавить сферу\n";
+        cout << "3. Добавить прямоугольник\n";
+        cout << "4. Добавить кубоид\n";
+        cout << "5. Вывести информацию о фигурах\n";
+        cout << "6. Завершить работу\n";
+        cout << "Выберите пункт меню: ";
+        cin >> choice;
 
-    cout << "\nИнформация о транспортных средствах в автопарке:" << endl;
-    for (int i = 0; i < fleetSize; ++i) {
-        fleet[i]->printInfo();
-    }
-
-    for (int i = 0; i < fleetSize; ++i) {
-        delete fleet[i];
-    }
+        switch (choice) {
+            case 1: {
+                double radius;
+                cout << "Введите радиус круга: ";
+                cin >> radius;
+                shapes.push_back(make_shared<Circle>(radius));
+                break;
+            }
+            case 2: {
+                double radius;
+                cout << "Введите радиус сферы: ";
+                cin >> radius;
+                shapes.push_back(make_shared<Sphere>(radius));
+                break;
+            }
+            case 3: {
+                double width, height;
+                cout << "Введите ширину и высоту прямоугольника: ";
+                cin >> width >> height;
+                shapes.push_back(make_shared<Rectangle>(width, height));
+                break;
+            }
+            case 4: {
+                double width, height;
+                cout << "Введите ширину и высоту кубоида: ";
+                cin >> width >> height;
+                shapes.push_back(make_shared<Cuboid>(width, height));
+                break;
+            }
+            case 5: {
+                for (const auto& shape : shapes) {
+                    shape->printInfo();
+                }
+                break;
+            }
+            case 6:
+                cout << "Завершение работы." << endl;
+                break;
+            default:
+                cout << "Неверный выбор. Пожалуйста, попробуйте снова." << endl;
+        }
+    } while (choice != 6);
 }
