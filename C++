@@ -1,47 +1,21 @@
 #include <iostream>
-#include <vector>
-#include <cstdlib>
-#include <ctime>
 
 using namespace std;
 
-struct Card {
-    string rank;
-    string suit;
-};
-
-vector<Card> createDeck() {
-    vector<Card> deck;
-    string ranks[] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Валет", "Дама", "Король", "Туз"};
-    string suits[] = {"Черви", "Бубны", "Пики", "Крести"};
-
-    for (const string& suit : suits) {
-        for (const string& rank : ranks) {
-            deck.push_back({rank, suit});
-        }
-    }
-    return deck;
-}
-
-void drawCard(vector<Card>& deck) {
-    if (deck.empty()) {
-        cout << "Нет больше карт." << endl;
-        return;
-    }
-
-    int index = rand() % deck.size();
-    Card drawnCard = deck[index];
-    cout << drawnCard.rank << " " << drawnCard.suit << endl;
-    deck.erase(deck.begin() + index);
-}
-
 int main() {
-    srand(static_cast<unsigned int>(time(0)));
-    vector<Card> deck = createDeck();
+    char symbol;
+    
+    cout << "Введите символ: ";
+    cin >> symbol;
 
-    for (int i = 0; i < 53; i++) {
-        cout << "Нажмите Enter для получения карты...";
-        cin.get();
-        drawCard(deck);
+    if (symbol >= '0' && symbol <= '9') {
+        cout << "Это цифра!" << endl;
     }
+    else if (symbol == '&' || symbol == '#' || symbol == '<') {
+        cout << "Это спец символ!" << endl;
+    }
+    else {
+        cout << "Непредусмотренный вариант!" << endl;
+    }
+
 }
